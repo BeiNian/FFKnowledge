@@ -53,14 +53,14 @@
 * 在MRC 中 __block 在block 中使用是不会 retain的。但在 RAC 中 __block 是会被retain 的。
 
 
-jiz#### 6、+(void)load ; +(void)initialize ；有什么用处？
+#### 6、+(void)load ; +(void)initialize ；有什么用处？
 * 如果父类和子类都调用，会优先调用父类再调用子类。
 * +(void)load 在初始化加载时调用。只会被调用一次。
 * +(void)initialize 会在当前类第一次主动使用时调用。有可能被调用过多次。如果子类没有实现，父类实现了，子类中会调用父类的+(void)initialize 方法。
 
 #### 7、请简述Responder Chain ？
 * 响应者对象：继承自UIResponder 的对象，称为响应者对象。
-* 响应者链：由多个响应者组成起来的链条，称为响应者链。
+* 响应者链：由多个响应者组成起来的链条，称为响应者链。（系统把包含这些点击事件的信息包装成UITouch和UIEvent形式的实例，然后找到当前运行的程序，逐级寻找能够响应这个事件的对象，直到没有响应者响应。这一寻找的过程，被称作事件的响应链）
 * 在iOS 中，能够响应事件的对象都是继承自UIResponder。UIResponder提供了4个用户点击回调的方法，分别对应用户点击开始、移动、点击结束、取消点击，其中只有程序强制退出过着来电时，取消点击事件才会调用。
 * 在捕获UIEvent 后，从AppDelegate-->UIAppcation-->UIWindow-->UIViewController-->UIView-->subView 进行查找。然后从 subView 开始尝试响应这个事件，并传递给 nextResponder，如果父节点不能响应则不继续往下传递。
 * 在查找过程中，通过pointInside 判断是否在本视图内，通过htiTest 返回响应事件的对象。
@@ -71,9 +71,19 @@ jiz#### 6、+(void)load ; +(void)initialize ；有什么用处？
 * GET请求提交数据有限制（不超过2KB），POST没有限制。
 * POST的安全性要高于GET的安全性。
 
+#### 9、KVO 原理
+* KVO 键值监听，基于runtime实现的。
+* 键值观察通知依赖于NSObject 的两个方法: willChangeValueForKey: 和 didChangevlueForKey:；在一个被观察属性发生改变之前， willChangeValueForKey:一定会被调用，这就 会记录旧的值。而当改变发生后，didChangeValueForKey:会被调用，继而 observeValueForKey:ofObject:change:context: 也会被调用。
+* 在某个类的属性第一次被观察时，系统在运行期间动态的为该类添加一个派生类，并在派生类中重写被观察的属性的setter方法。在派生类的重写方法中真正的实现通知机制。
+* 如果原类为Person，那么生成的派生类名为NSKVONotifying_Person
+* 每一个类对象都有一个isa指针指向当前类，当一个类的对象第一呗观察时，系统会偷偷的将isa指针指向动态生成的派生类，从而在给被监听属性赋值时执行的是派生类的setter方法。
+* 补充：KVO的这套实现机制中苹果还偷偷重写了class方法，让我们误认为还是使用的当前类，从而达到隐藏生成的派生类
 
 
-
+#### 10、Runloop
+* Runloop有事件时会去处理，没有事件时会休眠。
+* Runloop 和线程是绑定在一起的。每个线程（包括主线程）都有一个对应的Runloop 对象。我们不能自己创建Runloop 对象，但是可以获取到系统提供的Runloop 对象。
+* 主线程的Runloop 会在程序启动的时候完成启动，其他线程的 Runloop 默认并不会开启，需要我们手动启动。
 
 
 
